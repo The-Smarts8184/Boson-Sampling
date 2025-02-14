@@ -50,6 +50,21 @@ public class BosonSampling {
         return state;
     }
 
+    // Apply the unitary transformation to the photon state
+    public static double[] applyUnitary(double[][] unitary, int[] photonState) {
+        int n = unitary.length;
+        double[] outputState = new double[n];
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                outputState[i] += unitary[i][j] * photonState[j];
+            }
+        }
+
+        return outputState;
+    }
+
+
     // Compute the permanent of a matrix (Ryser's algorithm) using multiple threads
     // Compute the permanent using multi-threading
     public static double computePermanent(double[][] matrix) throws InterruptedException, ExecutionException {
@@ -100,15 +115,17 @@ public class BosonSampling {
     }
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
-        int n = 12; // Number of modes
-        int photons = 11; // Number of photons
-
+        System.out.println("Note: Run the program with increased heap size, e.g., java -Xmx4G BosonSampling");
+        int n = 3, photons = 2;
         double[][] unitaryMatrix = generateUnitaryMatrix(n);
         int[] photonState = generatePhotonState(n, photons);
 
         System.out.println("Initial Photon State: " + Arrays.toString(photonState));
         System.out.println("Unitary Matrix:");
         for (double[] row : unitaryMatrix) System.out.println(Arrays.toString(row));
+
+        double[] outputState = applyUnitary(unitaryMatrix, photonState);
+        System.out.println("Output Photon State After Unitary Transformation: " + Arrays.toString(outputState));
 
         double permanent = computePermanent(unitaryMatrix);
         System.out.println("Permanent of the matrix: " + permanent);
