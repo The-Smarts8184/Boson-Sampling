@@ -40,6 +40,16 @@ public class BosonSampling {
         return matrix;
     }
 
+
+    // Generate initial photon states (Fock states)
+    public static int[] generatePhotonState(int n, int photons) {
+        int[] state = new int[n];
+        for (int i = 0; i < photons; i++) {
+            state[i % n]++;
+        }
+        return state;
+    }
+
     // Compute the permanent of a matrix (Ryser's algorithm)
     public static double computePermanent(double[][] matrix) {
         int n = matrix.length;
@@ -83,9 +93,13 @@ public class BosonSampling {
     }
 
     public static void main(String[] args) {
-        int n = 10; // Number of modes/photons
-        double[][] unitaryMatrix = generateUnitaryMatrix(n);
+        int n = 25; // Number of modes
+        int photons = 25; // Number of photons
 
+        double[][] unitaryMatrix = generateUnitaryMatrix(n);
+        int[] photonState = generatePhotonState(n, photons);
+
+        System.out.println("Initial Photon State: " + Arrays.toString(photonState));
         System.out.println("Unitary Matrix:");
         for (double[] row : unitaryMatrix) System.out.println(Arrays.toString(row));
 
