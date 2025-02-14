@@ -1,6 +1,6 @@
 // Boson Sampling Simulation in Java
-
 import java.util.*;
+import java.util.concurrent.*;
 
 public class BosonSampling {
 
@@ -50,23 +50,30 @@ public class BosonSampling {
         return state;
     }
 
-    // Compute the permanent of a matrix (Ryser's algorithm)
-    public static double computePermanent(double[][] matrix) {
+    // Compute the permanent of a matrix (Ryser's algorithm) using multiple threads
+    // Compute the permanent using multi-threading
+    public static double computePermanent(double[][] matrix) throws InterruptedException, ExecutionException {
         int n = matrix.length;
         int[] indices = new int[n];
         for (int i = 0; i < n; i++) indices[i] = i;
 
-        double permanent = 0.0;
-        int sign = 1;
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        List<Future<Double>> futures = new ArrayList<>();
 
         do {
-            double product = 1.0;
-            for (int i = 0; i < n; i++) {
-                product *= matrix[i][indices[i]];
-            }
-            permanent += sign * product;
-            sign = -sign;
+            final int[] perm = Arrays.copyOf(indices, n);
+            futures.add(executor.submit(() -> {
+                double product = 1.0;
+                for (int i = 0; i < n; i++) {
+                    product *= matrix[i][perm[i]];
+                }
+                return product;
+            }));
         } while (nextPermutation(indices));
+
+        double permanent = 0.0;
+        for (Future<Double> f : futures) permanent += f.get();
+        executor.shutdown();
 
         return Math.abs(permanent);
     }
@@ -92,9 +99,9 @@ public class BosonSampling {
         while (start < end) swap(array, start++, end--);
     }
 
-    public static void main(String[] args) {
-        int n = 25; // Number of modes
-        int photons = 25; // Number of photons
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        int n = 12; // Number of modes
+        int photons = 11; // Number of photons
 
         double[][] unitaryMatrix = generateUnitaryMatrix(n);
         int[] photonState = generatePhotonState(n, photons);
