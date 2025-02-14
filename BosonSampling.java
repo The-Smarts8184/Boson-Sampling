@@ -1,15 +1,42 @@
+// Boson Sampling Simulation in Java
+
 import java.util.*;
 
 public class BosonSampling {
 
-    // Generate a random unitary matrix (for simplicity, using identity matrix for now)
+    // Generate a random unitary matrix using Gram-Schmidt process
     public static double[][] generateUnitaryMatrix(int n) {
+        Random rand = new Random();
         double[][] matrix = new double[n][n];
+
+        // Generate random complex vectors
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                matrix[i][j] = (i == j) ? 1.0 : 0.0;
+                matrix[i][j] = rand.nextGaussian();
             }
         }
+
+        // Perform Gram-Schmidt orthogonalization
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                double dot = 0;
+                for (int k = 0; k < n; k++) {
+                    dot += matrix[k][i] * matrix[k][j];
+                }
+                for (int k = 0; k < n; k++) {
+                    matrix[k][i] -= dot * matrix[k][j];
+                }
+            }
+            double norm = 0;
+            for (int k = 0; k < n; k++) {
+                norm += matrix[k][i] * matrix[k][i];
+            }
+            norm = Math.sqrt(norm);
+            for (int k = 0; k < n; k++) {
+                matrix[k][i] /= norm;
+            }
+        }
+
         return matrix;
     }
 
@@ -34,7 +61,6 @@ public class BosonSampling {
         return Math.abs(permanent);
     }
 
-    // Helper to generate next permutation (lexicographic order)
     private static boolean nextPermutation(int[] array) {
         int i = array.length - 2;
         while (i >= 0 && array[i] >= array[i + 1]) i--;
@@ -57,7 +83,7 @@ public class BosonSampling {
     }
 
     public static void main(String[] args) {
-        int n = 75; // Number of modes/photons
+        int n = 10; // Number of modes/photons
         double[][] unitaryMatrix = generateUnitaryMatrix(n);
 
         System.out.println("Unitary Matrix:");
@@ -65,7 +91,5 @@ public class BosonSampling {
 
         double permanent = computePermanent(unitaryMatrix);
         System.out.println("Permanent of the matrix: " + permanent);
-
-        // Further steps: Generate photon states, apply unitary transformation, simulate sampling
     }
 }
