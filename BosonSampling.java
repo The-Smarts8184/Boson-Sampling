@@ -64,6 +64,33 @@ public class BosonSampling {
         return outputState;
     }
 
+    // Simulate boson sampling by generating probabilistic outcomes
+    public static int[] simulateSampling(double[][] unitary, int samples) throws InterruptedException, ExecutionException {
+        int n = unitary.length;
+        int[] results = new int[n];
+        Random rand = new Random();
+
+        for (int s = 0; s < samples; s++) {
+            double[] probabilities = new double[n];
+            for (int i = 0; i < n; i++) {
+                probabilities[i] = 0;
+                for (int j = 0; j < n; j++) {
+                    probabilities[i] += unitary[i][j] * unitary[i][j];
+                }
+            }
+
+            double cumulative = 0;
+            double randomValue = rand.nextDouble();
+            for (int i = 0; i < n; i++) {
+                cumulative += probabilities[i];
+                if (randomValue <= cumulative) {
+                    results[i]++;
+                    break;
+                }
+            }
+        }
+        return results;
+    }
 
     // Compute the permanent of a matrix (Ryser's algorithm) using multiple threads
     // Compute the permanent using multi-threading
@@ -116,7 +143,7 @@ public class BosonSampling {
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         System.out.println("Note: Run the program with increased heap size, e.g., java -Xmx4G BosonSampling");
-        int n = 3, photons = 2;
+        int n = 10, photons = 50, samples = 100000;
         double[][] unitaryMatrix = generateUnitaryMatrix(n);
         int[] photonState = generatePhotonState(n, photons);
 
@@ -126,6 +153,9 @@ public class BosonSampling {
 
         double[] outputState = applyUnitary(unitaryMatrix, photonState);
         System.out.println("Output Photon State After Unitary Transformation: " + Arrays.toString(outputState));
+
+        int[] samplingResults = simulateSampling(unitaryMatrix, samples);
+        System.out.println("Sampling Results (Photon Detection Counts): " + Arrays.toString(samplingResults));
 
         double permanent = computePermanent(unitaryMatrix);
         System.out.println("Permanent of the matrix: " + permanent);
