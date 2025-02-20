@@ -143,7 +143,7 @@ public class BosonSampling {
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         System.out.println("Note: Run the program with increased heap size, e.g., java -Xmx4G BosonSampling");
-        int n = 10, photons = 50, samples = 100000;
+        int n = 11, photons =  2147483647, samples =  2147483647;
         double[][] unitaryMatrix = generateUnitaryMatrix(n);
         int[] photonState = generatePhotonState(n, photons);
 
